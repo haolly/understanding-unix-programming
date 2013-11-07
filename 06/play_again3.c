@@ -13,13 +13,20 @@
 void tty_mode(int how)
 {
     static struct termios original_mode;
+    static int original_flags;
+    static int stored = 0;
     if(how == 0)
     {
         tcgetattr(0,&original_mode);
         //0 is the standard input
+        original_flags = fcntl(0,F_GETFL);
+        stored =1;
     }
-    else 
-        tcsetattr(0,TCSANOW, &original_mode);
+    else if(stored)
+    {
+        tcsetattr(0, &original_mode);
+        fcntl(0,F_SETFL, original_flags);
+    }
 }
 void set_rc_noecho_mode();
 int get_response(char*, int);
